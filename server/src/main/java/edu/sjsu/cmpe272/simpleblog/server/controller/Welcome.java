@@ -76,12 +76,15 @@ public class Welcome {
 
     @PostMapping("/user/create")
     public ResponseEntity<Map<String, String>> createUser(@RequestBody UserRequest request) {
+        request.setPublicKey(request.getPublicKey().replace("-----BEGIN PUBLIC KEY-----\\n", "").replace("\\n-----END PUBLIC KEY-----\\n", ""));
+
         if (userRepository.findByUser(request.getUser()) != null) {
             return ResponseEntity.badRequest().body(Map.of("error", "User already exists"));
         } else {
             userRepository.save(request);
             return ResponseEntity.ok(Map.of("message", "welcome"));
         }
+
 
     }
 
