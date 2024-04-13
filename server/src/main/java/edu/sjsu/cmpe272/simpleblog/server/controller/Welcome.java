@@ -11,7 +11,14 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import java.security.*;
+
+import java.security.InvalidKeyException;
+import java.security.KeyFactory;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.security.PublicKey;
+import java.security.Signature;
+import java.security.SignatureException;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.*;
@@ -141,6 +148,23 @@ public class Welcome {
         List<MessageRequest> fetchedMessages = messageRepository.findAll();
 
         List<MessageRequest> filteredMessages;
+        int remainingCount = count;
+        int offset = 0;
+
+        while (remainingCount > 0) {
+            int batchSize = Math.min(20, remainingCount);
+            List<MessageRequest> batchMessages = messageRepository.findNextMessages(startingId);
+
+            fetchedMessages.addAll(batchMessages);
+
+            remainingCount -= batchSize;
+            offset += batchSize;
+
+            if (batchMessages.size() < batchSize) {
+                break;
+            }
+        }
+
 
         if (startingId == -1) {
             filteredMessages = fetchedMessages.stream()
@@ -165,6 +189,44 @@ public class Welcome {
         return filteredMessages;
 
     }
+//private List<MessageRequest> fetchMessages(int count, int startingId) {
+//    List<MessageRequest> fetchedMessages = new ArrayList<>();
+//    int remainingCount = count;
+//    int offset = 0;
+//
+//    while (remainingCount > 0) {
+//        int batchSize = Math.min(20, remainingCount);
+//        List<MessageRequest> batchMessages = messageRepository.findNextMessages(startingId);
+//
+//        fetchedMessages.addAll(batchMessages);
+//
+//        remainingCount -= batchSize;
+//        offset += batchSize;
+//
+//        if (batchMessages.size() < batchSize) {
+//            break;
+//        }
+//    }
+//
+//    if (startingId == -1) {
+//        Collections.reverse(fetchedMessages);
+//    }
+//else {
+//        int startIndex = 0;
+//        for (int i = 0; i < fetchedMessages.size(); i++) {
+//            if (fetchedMessages.get(i).getMessageId() == startingId) {
+//                startIndex = i;
+//                break;
+//            }
+//        }
+//        fetchedMessages = fetchedMessages.stream()
+//                    .skip(startIndex)
+//                    .limit(count)
+//                    .collect(Collectors.toList());
+//    }
+//
+//    return fetchedMessages;
+//}
 
 
 

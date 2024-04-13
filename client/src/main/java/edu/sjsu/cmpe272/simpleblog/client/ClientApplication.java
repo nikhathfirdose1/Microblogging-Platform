@@ -13,20 +13,34 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
 import org.springframework.web.client.RestTemplate;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.nio.file.Files;
 
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Parameters;
 
-import java.io.*;
-import java.security.*;
-import java.time.LocalDateTime;
-import java.util.*;
-
+import java.security.KeyFactory;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
+import java.security.MessageDigest;
 import java.security.PrivateKey;
+import java.security.Signature;
+import java.time.LocalDateTime;
+
+
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.util.Base64;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 
 @SpringBootApplication
@@ -112,7 +126,6 @@ public class ClientApplication implements CommandLineRunner, ExitCodeGenerator {
 
             HttpEntity<Map<String, Object>> requestEntity = new HttpEntity<>(requestBody);
             ResponseEntity<Map> responseEntity = restTemplate.postForEntity(url+"/messages/create", requestEntity, Map.class);
-//            System.out.println("The request entity is " + requestEntity);
 
         } catch (Exception e) {
             e.printStackTrace();
