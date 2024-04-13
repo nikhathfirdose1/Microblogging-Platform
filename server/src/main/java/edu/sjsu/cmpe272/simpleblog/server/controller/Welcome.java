@@ -21,7 +21,10 @@ import java.security.Signature;
 import java.security.SignatureException;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
-import java.util.*;
+import java.util.Base64;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Controller
@@ -76,6 +79,7 @@ public class Welcome {
 
     @PostMapping("/user/create")
     public ResponseEntity<Map<String, String>> createUser(@RequestBody UserRequest request) {
+
         request.setPublicKey(request.getPublicKey().replace("-----BEGIN PUBLIC KEY-----\\n", "").replace("\\n-----END PUBLIC KEY-----\\n", ""));
 
         if (userRepository.findByUser(request.getUser()) != null) {
@@ -174,6 +178,5 @@ public class Welcome {
         return filteredMessages;
 
     }
-
 
 }
