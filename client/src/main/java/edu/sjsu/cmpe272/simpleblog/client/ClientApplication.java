@@ -151,9 +151,16 @@ public class ClientApplication implements CommandLineRunner, ExitCodeGenerator {
         saveToIniFile(userId, keyPair.getPrivate());
         Map<String, String> responseBody = new HashMap<>();
         responseBody.put("user", userId);
+
         responseBody.put("public-key", Base64.getEncoder().encodeToString(keyPair.getPublic().getEncoded()));
 
         Map response = restTemplate.postForObject(url+"/user/create", responseBody, Map.class);
+
+        String publicKey = response.get("public-key").toString();
+        publicKey = publicKey.replace("-----BEGIN PUBLIC KEY-----\n", "")
+                .replace("\n-----END PUBLIC KEY-----\n", "");
+        response.put("public-key", publicKey);
+
         return 2;
     }
 
