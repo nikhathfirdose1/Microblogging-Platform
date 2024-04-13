@@ -86,9 +86,7 @@ public class ClientApplication implements CommandLineRunner, ExitCodeGenerator {
 
     private final RestTemplate restTemplate = new RestTemplate();
 
-    private String url = "http://firdose.mooo.com";
-
-
+    private String url = "https://firdose.mooo.com";
 
     @Command(name = "post", description = "Post a message to the server")
     public int post(@Parameters String message, @Parameters(defaultValue = "null") String attachment) {
