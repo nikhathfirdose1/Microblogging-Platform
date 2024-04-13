@@ -12,6 +12,7 @@ public class UserRequest {
     @JsonIgnore
     private Integer id;
 
+    @Column(unique = true, name="user_name")
     private String user;
 
     @Column(length = 2000)

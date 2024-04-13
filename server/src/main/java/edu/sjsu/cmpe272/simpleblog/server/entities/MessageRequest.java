@@ -18,7 +18,6 @@ public class MessageRequest {
     private String message;
     @Column(length = 10000)
     private String attachment;
-    @Lob
     @Column(length = 2000)
     private String signature;
 

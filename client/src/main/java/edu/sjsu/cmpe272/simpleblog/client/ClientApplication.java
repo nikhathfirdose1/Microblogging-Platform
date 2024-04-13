@@ -43,15 +43,14 @@ public class ClientApplication implements CommandLineRunner, ExitCodeGenerator {
     }
 
     @Data
-    @AllArgsConstructor
     public static class MessageRequestClient {
+        @JsonProperty("message-id")
+        private Integer messageId;
         private String date;
         private String author;
         private String message;
         private String attachment;
         private String signature;
-        @JsonProperty("message-id")
-        private Integer messageId;
     }
 
     @Data
@@ -71,6 +70,8 @@ public class ClientApplication implements CommandLineRunner, ExitCodeGenerator {
 
     private final RestTemplate restTemplate = new RestTemplate();
 
+    private String url = "http://localhost:8080";
+
 
 
     @Command(name = "post", description = "Post a message to the server")
@@ -82,12 +83,18 @@ public class ClientApplication implements CommandLineRunner, ExitCodeGenerator {
             requestBody.put("date", LocalDateTime.now().toString());
             requestBody.put("message", message);
             if (attachment != null && !attachment.equals("null")) {
+                File attachmentFile = new File(attachment);
+                if (!attachmentFile.exists() || attachmentFile.isDirectory()) {
+                    System.out.println("Attachment file not found or is a directory.");
+                    return 1;
+                }
+
                 try {
-                    byte[] fileBytes = Files.readAllBytes(new File(attachment).toPath());
+                    byte[] fileBytes = Files.readAllBytes(attachmentFile.toPath());
                     String base64String = Base64.getEncoder().encodeToString(fileBytes);
                     requestBody.put("attachment", base64String);
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
+                } catch (IOException e) {
+                    throw new RuntimeException("Error reading attachment file.", e);
                 }
             }
             MessageDigest digest = MessageDigest.getInstance("SHA-256");
@@ -104,7 +111,7 @@ public class ClientApplication implements CommandLineRunner, ExitCodeGenerator {
             requestBody.put("signature", base64Signature);
 
             HttpEntity<Map<String, Object>> requestEntity = new HttpEntity<>(requestBody);
-            ResponseEntity<Map> responseEntity = restTemplate.postForEntity("http://localhost:8080/messages/create", requestEntity, Map.class);
+            ResponseEntity<Map> responseEntity = restTemplate.postForEntity(url+"/messages/create", requestEntity, Map.class);
 //            System.out.println("The request entity is " + requestEntity);
 
         } catch (Exception e) {
@@ -133,12 +140,12 @@ public class ClientApplication implements CommandLineRunner, ExitCodeGenerator {
         responseBody.put("user", userId);
         responseBody.put("public-key", Base64.getEncoder().encodeToString(keyPair.getPublic().getEncoded()));
 
-        Map response = restTemplate.postForObject("http://localhost:8080/user/create", responseBody, Map.class);
+        Map response = restTemplate.postForObject(url+"/user/create", responseBody, Map.class);
         return 2;
     }
 
     @Command(name = "list", description = "List messages from the server")
-    public void list(
+    public int list(
             @CommandLine.Option(names = {"--starting"}, description = "Starting message ID", defaultValue = "-1") int startingId,
             @CommandLine.Option(names = {"--count"}, description = "Number of messages to retrieve", defaultValue = "10") int count,
             @CommandLine.Option(names = {"-a", "--save-attachment"}, description = "Save attachment to file") boolean saveAttachment) {
@@ -151,7 +158,7 @@ public class ClientApplication implements CommandLineRunner, ExitCodeGenerator {
             HttpEntity<Map<String, Object>> requestEntity = new HttpEntity<>(requestBody);
 
             ResponseEntity<List<MessageRequestClient>> responseEntity = restTemplate.exchange(
-                    "http://localhost:8080/messages/list",
+                    url + "/messages/list",
                     HttpMethod.POST,
                     requestEntity,
                     new ParameterizedTypeReference<List<MessageRequestClient>>() {
@@ -182,6 +189,7 @@ public class ClientApplication implements CommandLineRunner, ExitCodeGenerator {
         } catch (Exception e) {
             e.printStackTrace();
         }
+        return 2;
     }
 
     private String formatMessage(MessageRequestClient message) {
@@ -220,7 +228,7 @@ public class ClientApplication implements CommandLineRunner, ExitCodeGenerator {
     private static KeyPair generateKeyPair() {
         try {
             KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA");
-            keyPairGenerator.initialize(2048); // Key size
+            keyPairGenerator.initialize(2048);
             return keyPairGenerator.generateKeyPair();
 
         } catch (Exception e) {

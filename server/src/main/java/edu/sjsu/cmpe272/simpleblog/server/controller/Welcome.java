@@ -34,30 +34,26 @@ public class Welcome {
     @PostMapping("/messages/create")
     public ResponseEntity<Map<String, Object>> createMessage(@RequestBody MessageRequest request) {
         try {
-            // Calculate message hash
+
             MessageDigest digest = MessageDigest.getInstance("SHA-256");
             byte[] messageHash = digest.digest(request.getMessage().getBytes());
 
-            // Retrieve user's public key from the repository
             UserRequest user = userRepository.findByUser(request.getAuthor());
             if (user == null || user.getPublicKey() == null || user.getPublicKey().isEmpty()) {
                 return ResponseEntity.badRequest().body(Map.of("error", "User not found or public key is empty"));
             }
             String pkString = user.getPublicKey();
 
-            // Decode public key string and generate public key object
             byte[] pkBytes = Base64.getDecoder().decode(pkString);
             X509EncodedKeySpec spec = new X509EncodedKeySpec(pkBytes);
             KeyFactory keyFactory = KeyFactory.getInstance("RSA");
             PublicKey publicKey = keyFactory.generatePublic(spec);
 
-            // Verify the signature
             Signature verifier = Signature.getInstance("SHA256withRSA");
             verifier.initVerify(publicKey);
             verifier.update(messageHash);
             boolean isVerified = verifier.verify(Base64.getDecoder().decode(request.getSignature()));
 
-            // Save message if signature is verified
             if (isVerified) {
                 messageRepository.save(request);
                 return ResponseEntity.ok(Map.of("message-id", request.getMessageId()));
@@ -95,17 +91,15 @@ public class Welcome {
 
     @GetMapping("/user/{username}/public-key")
     public ResponseEntity<?> getUserPublicKey(@PathVariable String username) {
-        String publicKeyString = String.valueOf(userRepository.findByUser(username));  //db.get(username);
-
-        if (publicKeyString != null) {
+        UserRequest user = userRepository.findByUser(username);
+        if (user != null && user.getPublicKey() != null && !user.getPublicKey().isEmpty()) {
             try {
-
+                String publicKeyString = user.getPublicKey();
                 byte[] publicKeyBytes = Base64.getDecoder().decode(publicKeyString);
                 X509EncodedKeySpec keySpec = new X509EncodedKeySpec(publicKeyBytes);
                 KeyFactory keyFactory = KeyFactory.getInstance("RSA");
                 PublicKey publicKey = keyFactory.generatePublic(keySpec);
 
-                // Convert the public key to PEM format
                 String pemPublicKey = convertToPEM(publicKey);
 
                 return ResponseEntity.ok(pemPublicKey);
@@ -113,17 +107,21 @@ public class Welcome {
                 e.printStackTrace();
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                         .body(Map.of("error", "Error encoding public key"));
+            } catch (IllegalArgumentException e) {
+                e.printStackTrace();
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                        .body(Map.of("error", "Invalid Base64 encoding in public key"));
             }
         } else {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(Map.of("error", "User not found"));
+                    .body(Map.of("error", "User not found or public key is empty"));
         }
     }
 
     private String convertToPEM(PublicKey publicKey) {
         String base64EncodedKey = Base64.getEncoder().encodeToString(publicKey.getEncoded());
         StringBuilder pemBuilder = new StringBuilder("""
-                -----BEGIN PUBLIC KEY-----
+                -----BEGIN PUBLIC KEY----- \n
                 """);
         int length = base64EncodedKey.length();
         int startIndex = 0;
@@ -133,31 +131,13 @@ public class Welcome {
             startIndex = endIndex;
         }
         pemBuilder.append("""
-                -----END PUBLIC KEY-----
+               -----END PUBLIC KEY-----
                 """);
         return pemBuilder.toString();
     }
 
 
     private List<MessageRequest> fetchMessages(int count, int startingId) {
-
-
-//        if(startingId == -1) {
-//            return messages.stream()
-//                    .skip(Math.max(0, messages.size() - count))
-//                    .limit(count)
-//                    .collect(Collectors.toList());
-//        }else{
-//            return messages.stream()
-//                    .skip(Math.max(0, messages.size() - startingId))
-//                    .limit(count)
-//                    .collect(Collectors.toList());
-//        }
-
-        if (count > 20) {
-            throw new IllegalArgumentException("Count cannot exceed 20");
-        }
-
         List<MessageRequest> fetchedMessages = messageRepository.findAll();
 
         List<MessageRequest> filteredMessages;
@@ -185,4 +165,7 @@ public class Welcome {
         return filteredMessages;
 
     }
+
+
+
 }
