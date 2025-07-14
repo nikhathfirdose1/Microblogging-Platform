@@ -1,28 +1,28 @@
 # 🐦 Kafka-Based Microblogging Platform
 
-A real-time microblogging system powered by **Apache Kafka**, **FastAPI**, and **Docker**. It simulates publishing and consuming messages in real time, showcasing event-driven architecture using producers, consumers, and a RESTful API.
+A real-time microblogging system powered by **Apache Kafka**, **Flask**, and **Docker**. It simulates message publishing and consumption in real-time using producers, consumers, and a RESTful API gateway.
 
 ---
 
 ## ✨ Features
 
 - 📤 Kafka producer for publishing micro-messages  
-- 📥 Kafka consumer for real-time stream processing  
-- 🌐 FastAPI gateway exposing REST endpoints  
-- 🐳 Docker Compose for orchestration  
-- 🔁 Decoupled, scalable message flow architecture  
-- 🛠️ Modular microservice-style design
+- 📥 Kafka consumer for stream-based message consumption  
+- 🌐 Flask-based API gateway for sending and retrieving messages  
+- 🐳 Docker Compose setup for Kafka, Zookeeper, and all services  
+- 🔁 Asynchronous, event-driven system architecture  
+- 🛠️ Modular structure: Producer, Consumer, and API components
 
 ---
 
 ## 🛠️ Technologies Used
 
 - **Language:** Python  
-- **Framework:** FastAPI  
+- **Web Framework:** Flask  
 - **Streaming:** Apache Kafka, kafka-python  
 - **Infrastructure:** Docker, Docker Compose, Zookeeper  
-- **Testing:** Postman, curl  
-- **Architecture:** Event-driven microservices
+- **Testing Tools:** curl, Postman  
+- **Architecture:** Microservices, event-driven messaging
 
 ---
 
@@ -30,17 +30,17 @@ A real-time microblogging system powered by **Apache Kafka**, **FastAPI**, and *
 
 ### ✅ Prerequisites
 
-- Docker installed  
-- Docker Compose installed
+- Docker  
+- Docker Compose
 
-### ▶️ Run Locally
+### ▶️ Run the System
 
 ```bash
 # Clone the repo
 git clone https://github.com/nikhathfirdose1/Microblogging-Platform.git
 cd Microblogging-Platform
 
-# Build and start all services
+# Start all services
 docker-compose up --build
 ```
 
@@ -50,16 +50,15 @@ docker-compose up --build
 
 ### POST /publish
 
-Send a message to the Kafka topic.
+Publishes a message to Kafka.
 
 ```bash
-curl -X POST http://localhost:8000/publish \
+curl -X POST http://localhost:5000/publish \
      -H "Content-Type: application/json" \
      -d '{"user": "nikhath", "message": "Hello Kafka!"}'
 ```
 
-**Sample Response:**
-
+**Response:**
 ```json
 {
   "status": "Message published"
@@ -70,14 +69,13 @@ curl -X POST http://localhost:8000/publish \
 
 ### GET /messages
 
-Retrieve all messages consumed from Kafka.
+Returns messages consumed from Kafka.
 
 ```bash
-curl http://localhost:8000/messages
+curl http://localhost:5000/messages
 ```
 
 **Sample Response:**
-
 ```json
 [
   {
@@ -94,13 +92,13 @@ curl http://localhost:8000/messages
 
 ```
 Microblogging-Platform/
-├── api-gateway/         # FastAPI app exposing endpoints
-│   └── main.py
-├── producer/            # Kafka producer script
+├── api_gateway/
+│   └── app.py
+├── producer/
 │   └── producer.py
-├── consumer/            # Kafka consumer script
+├── consumer/
 │   └── consumer.py
-├── docker-compose.yml   # Docker setup for Kafka, Zookeeper, services
+├── docker-compose.yml
 └── README.md
 ```
 
@@ -109,7 +107,6 @@ Microblogging-Platform/
 ## 🧪 Example Output
 
 **Consumer Terminal:**
-
 ```
 [Consumer] Received message from nikhath: Hello Kafka!
 ```
@@ -118,13 +115,13 @@ Microblogging-Platform/
 
 ## 🎯 Learning Goals
 
-- Build event-driven systems with Kafka  
-- Use Docker Compose to orchestrate microservices  
-- Understand producer-consumer workflows  
-- Develop and expose APIs using FastAPI
+- Build Kafka-based real-time pipelines  
+- Use Docker Compose to orchestrate services  
+- Understand producer-consumer messaging systems  
+- Build RESTful APIs with Flask for microservices
 
 ---
 
 ## 📄 License
 
-This project is for educational and demonstration purposes only.
+This project is intended for educational and demonstration purposes only.
