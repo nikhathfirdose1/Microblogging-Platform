@@ -1,61 +1,130 @@
-# Microblogging Platform
+# 🐦 Kafka-Based Microblogging Platform
 
-A distributed microblogging platform implemented using Java, Spring Boot, Kafka, and Zookeeper, designed for fault-tolerant data replication, secure communication, and efficient message processing.
+A real-time microblogging system powered by **Apache Kafka**, **FastAPI**, and **Docker**. It simulates publishing and consuming messages in real time, showcasing event-driven architecture using producers, consumers, and a RESTful API.
 
-## Features
+---
 
-- **Distributed Architecture:** Built using Kafka and Zookeeper for efficient, fault-tolerant message replication across multiple nodes.
-- **Secure Communication:** Integrated RSA-based authentication with OpenSSL, including a simulated PKI for certificate management and secure user validation.
-- **High Performance:** Capable of handling over 5,000+ posts with dynamic server scalability and efficient message delivery.
-- **RESTful API:** Exposed REST APIs for creating, retrieving, and managing microblog posts.
+## ✨ Features
 
-## Tech Stack
+- 📤 Kafka producer for publishing micro-messages  
+- 📥 Kafka consumer for real-time stream processing  
+- 🌐 FastAPI gateway exposing REST endpoints  
+- 🐳 Docker Compose for orchestration  
+- 🔁 Decoupled, scalable message flow architecture  
+- 🛠️ Modular microservice-style design
 
-- **Backend:** Java, Spring Boot
-- **Messaging & Coordination:** Kafka, Zookeeper
-- **Security:** RSA, OpenSSL, SSL/TLS
-- **API Design:** REST APIs
+---
 
-## Architecture
+## 🛠️ Technologies Used
 
-The platform follows a distributed architecture where:
-- **Kafka** handles message brokering and event distribution.
-- **Zookeeper** manages node coordination and leader election.
-- **Spring Boot** provides the RESTful API for client interaction.
-- **RSA and OpenSSL** secure communications and user authentication.
+- **Language:** Python  
+- **Framework:** FastAPI  
+- **Streaming:** Apache Kafka, kafka-python  
+- **Infrastructure:** Docker, Docker Compose, Zookeeper  
+- **Testing:** Postman, curl  
+- **Architecture:** Event-driven microservices
 
-## Setup Instructions
+---
 
-### Prerequisites
-- Java 11+
-- Apache Kafka & Zookeeper
-- OpenSSL
+## 🚀 Getting Started
 
-### Steps
-1. **Clone the repository:**
-   ```bash
-   git clone https://github.com/github-school/microblog-platform.git
-   cd microblog-platform
-   ```
-2. **Start Kafka and Zookeeper:**
-   ```bash
-   zookeeper-server-start.sh config/zookeeper.properties
-   kafka-server-start.sh config/server.properties
-   ```
-3. **Generate RSA Keys (for OpenSSL):**
-   ```bash
-   openssl genpkey -algorithm RSA -out private_key.pem
-   openssl req -new -x509 -key private_key.pem -out cert.pem -days 365
-   ```
-4. **Build the Project:**
-   ```bash
-   mvn clean install
-   ```
-5. **Run the Application:**
-   ```bash
-   java -jar target/microblog-platform.jar
-   ```
+### ✅ Prerequisites
 
-## Usage
-- **Create a Post:** `POST /api/posts`
-- **Retrieve Posts:** `GET /api/posts`
+- Docker installed  
+- Docker Compose installed
+
+### ▶️ Run Locally
+
+```bash
+# Clone the repo
+git clone https://github.com/nikhathfirdose1/Microblogging-Platform.git
+cd Microblogging-Platform
+
+# Build and start all services
+docker-compose up --build
+```
+
+---
+
+## 🔌 API Endpoints
+
+### POST /publish
+
+Send a message to the Kafka topic.
+
+```bash
+curl -X POST http://localhost:8000/publish \
+     -H "Content-Type: application/json" \
+     -d '{"user": "nikhath", "message": "Hello Kafka!"}'
+```
+
+**Sample Response:**
+
+```json
+{
+  "status": "Message published"
+}
+```
+
+---
+
+### GET /messages
+
+Retrieve all messages consumed from Kafka.
+
+```bash
+curl http://localhost:8000/messages
+```
+
+**Sample Response:**
+
+```json
+[
+  {
+    "user": "nikhath",
+    "message": "Hello Kafka!",
+    "timestamp": "2025-07-13T18:00:00Z"
+  }
+]
+```
+
+---
+
+## 📂 Project Structure
+
+```
+Microblogging-Platform/
+├── api-gateway/         # FastAPI app exposing endpoints
+│   └── main.py
+├── producer/            # Kafka producer script
+│   └── producer.py
+├── consumer/            # Kafka consumer script
+│   └── consumer.py
+├── docker-compose.yml   # Docker setup for Kafka, Zookeeper, services
+└── README.md
+```
+
+---
+
+## 🧪 Example Output
+
+**Consumer Terminal:**
+
+```
+[Consumer] Received message from nikhath: Hello Kafka!
+```
+
+---
+
+## 🎯 Learning Goals
+
+- Build event-driven systems with Kafka  
+- Use Docker Compose to orchestrate microservices  
+- Understand producer-consumer workflows  
+- Develop and expose APIs using FastAPI
+
+---
+
+## 📄 License
+
+This project is for educational and demonstration purposes only.
